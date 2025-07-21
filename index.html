@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Driven Development Path</title>
+    <!-- Chargement de Tailwind CSS pour un design moderne -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Utilisation de la police Inter pour une meilleure lisibilité -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+      }
+      :root {
+        --spec-color: #3b82f6; /* Bleu */
+        --prod-color: #10b981; /* Vert */
+        --valid-color: #f97316; /* Orange */
+      }
+      /* Classes de couleur pour une maintenance facile */
+      .spec-color { color: var(--spec-color); }
+      .spec-bg { background-color: var(--spec-color); }
+      .spec-border { border-color: var(--spec-color); }
+
+      .prod-color { color: var(--prod-color); }
+      .prod-bg { background-color: var(--prod-color); }
+      .prod-border { border-color: var(--prod-color); }
+
+      .valid-color { color: var(--valid-color); }
+      .valid-bg { background-color: var(--valid-color); }
+      .valid-border { border-color: var(--valid-color); }
+
+      /* Conteneur pour les deux lignes (fond et progression) */
+      .path-lines-container {
+        position: absolute;
+        /* Le top est ajusté pour se centrer avec le point, en tenant compte de la date au-dessus */
+        top: calc(1rem + 1.25rem); /* 1rem (hauteur date) + 1.25rem (moitié hauteur point) */
+        height: 4px; /* Épaisseur de la ligne */
+        z-index: 0;
+        /* La largeur et la position (left/right) sont définies par JS pour un alignement parfait */
+      }
+      /* Ligne de fond grise */
+      .path-background {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-color: #4b5563; /* Gris foncé */
+        border-radius: 2px;
+      }
+      /* Ligne de progression colorée */
+      .path-progress {
+        position: absolute;
+        width: 0; /* La largeur sera définie par JS */
+        height: 100%;
+        background-color: white; /* Sera colorée par les classes spec/prod/valid */
+        border-radius: 2px;
+        transition: width 0.5s ease-in-out;
+      }
+
+      /* Style pour les points des étapes */
+      .step-point {
+        position: relative;
+        z-index: 1;
+        transition: transform 0.2s ease, background-color 0.3s ease;
+        cursor: pointer;
+      }
+      .step-point:hover {
+        transform: scale(1.15);
+      }
+
+      /* Remplissage de TOUTES les étapes actives (celles dont le niveau est <= au niveau actuel) */
+      .spec-border.step-active .step-point { background-color: var(--spec-color); }
+      .prod-border.step-active .step-point { background-color: var(--prod-color); }
+      .valid-border.step-active .step-point { background-color: var(--valid-color); }
+
+
+      /* Style pour l'infobulle (tooltip) */
+      #tooltip {
+        position: absolute;
+        display: none;
+        padding: 0.75rem;
+        background-color: #1f2937;
+        color: #d1d5db;
+        border: 1px solid #4b5563;
+        border-radius: 0.5rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15);
+        max-width: 320px;
+        z-index: 50;
+        pointer-events: none;
+      }
+    </style>
+</head>
+<body class="bg-gray-900 text-white antialiased">
+
+<div class="container mx-auto px-4 py-12 md:py-20">
+
+    <header class="text-center mb-12 md:mb-20">
+        <h1 class="text-4xl md:text-5xl font-bold tracking-tight">AI-Driven Development Path</h1>
+        <p class="mt-4 text-lg text-gray-400 max-w-3xl mx-auto">A developer's progression path toward AI autonomy.</p>
+    </header>
+
+    <main id="paths-wrapper" class="space-y-16">
+        <!-- Les fils d'Ariane seront générés ici par JavaScript -->
+    </main>
+
+    <footer class="text-center mt-20 text-gray-500">
+        <p>Dates apply to existing app with legacy and few automatic tests.</p>
+    </footer>
+</div>
+
+<!-- Conteneur de l'infobulle (tooltip), initialement caché -->
+<div id="tooltip"></div>
+
+<script>
+  // =================================================================================
+  // === CONFIGURATION CENTRALE DE L'APPLICATION =====================================
+  // =================================================================================
+
+  // --- CONFIGURATION DE LA PROGRESSION ---
+  // Modifiez simplement les valeurs ici pour mettre à jour la visualisation.
+  // Vous pouvez utiliser des nombres décimaux comme 1.5.
+  const progressConfig = {
+    specification: 1.5,
+    production: 2.8,
+    validation: 1.8
+  };
+
+  // --- DONNÉES DE CONTENU POUR LES FILS D'ARIANE ---
+  const aiDrivenPath = {
+    specification: {
+      title: "Spécification",
+      subtitle: "(Qui définit le travail ?)",
+      colorClass: "spec",
+      steps: [
+        { level: 0, date: "2024", title: "Le Traducteur", roleIA: "Nul. L'IA n'intervient pas.", roleDev: "Reçoit un besoin métier, pose les questions et rédige 100% des spécifications techniques." },
+        { level: 1, date: "T1 2025", title: "L'Assistant de Réflexion", roleIA: "Outil de brainstorming. Suggère des idées, des approches, des cas limites.", roleDev: "Utilise les idées de l'IA pour nourrir sa réflexion mais reste l'unique auteur de la spécification." },
+        { level: 2, date: "T2 2025", title: "Le Structureur de Plan", roleIA: "Prend des idées en vrac et propose une première ébauche de plan technique structuré.", roleDev: "Valide, réorganise et complète ce premier plan, qui sert de fondation à la spec finale." },
+        { level: 3, date: "T3 2025", title: "Le Rédacteur de Specs", roleIA: "Rédacteur. À partir d'un plan validé, génère le document formel et détaillé.", roleDev: "Fournit le plan structuré et les décisions clés, puis valide et affine le document final produit par l'IA." },
+        { level: 4, date: "T1 2026", title: "L'Architecte de Solution", roleIA: "À partir d'un brief de haut niveau, conçoit l'architecture technique et génère la spécification complète.", roleDev: "Fournit un brief clair, valide les choix d'architecture de l'IA et approuve la spécification finale." },
+        { level: 5, date: "2027", title: "L'Agent Proactif", roleIA: "Initiateur. Propose des améliorations ou features en analysant des données (logs, feedback).", roleDev: "Évalue la pertinence métier des propositions de l'IA et les intègre (ou non) à la roadmap." }
+      ]
+    },
+    production: {
+      title: "Production",
+      subtitle: "(Qui écrit le code ?)",
+      colorClass: "prod",
+      steps: [
+        { level: 0, date: "2023", title: "L'Artisan (100% Manuel)", roleIA: "Nulle. L'IA n'écrit aucune ligne de code.", roleDev: "Écrit 100% du code source manuellement." },
+        { level: 1, date: "2024", title: "L'Assistant de Frappe", roleIA: "Suggère des fins de ligne ou des fragments de code (complétion).", roleDev: "Code la logique principale et accepte les micro-suggestions pour accélérer la frappe." },
+        { level: 2, date: "T1 2025", title: "Le Générateur de Fonctions", roleIA: "Écrit des fonctions ou méthodes complètes et autonomes à partir d'un commentaire.", roleDev: "Spécifie le comportement d'une unité de code et valide le résultat généré." },
+        { level: 3, date: "T3 2025", title: "Le Bâtisseur Supervisé", roleIA: "Génère 80-90% du code pour un composant ou une classe.", roleDev: "Agit en architecte, puis finalise et corrige manuellement le code généré pour l'intégrer." },
+        { level: 4, date: "2026", title: "L'Implémenteur Fiable", roleIA: "Prend une spec technique complète et réalise l'ensemble de l'implémentation avec une haute fidélité.", roleDev: "Fournit une spécification parfaite et effectue une revue finale, n'intervenant que pour des ajustements mineurs." },
+        { level: 5, date: "2027", title: "L'Agent de Production Autonome", roleIA: "Gère la production de code de bout en bout à partir d'une spec.", roleDev: "Se concentre uniquement sur la validation du résultat fonctionnel." }
+      ]
+    },
+    validation: {
+      title: "Validation",
+      subtitle: "(La confiance par l'autonomie de l'IA)",
+      colorClass: "valid",
+      steps: [
+        { level: 0, date: "2024", title: "L'Inspecteur Manuel", roleIA: "Nulle. La qualité repose entièrement sur l'humain.", roleDev: "Relit manuellement le code, exécute les tests et vérifie la fonctionnalité à la main." },
+        { level: 1, date: "T1 2025", title: "Le Gardien de Stabilité", roleIA: "Exécute la suite de tests existante pour une validation de base : 'ne rien casser'.", roleDev: "Se fie à l'IA pour le premier filet de sécurité et se concentre sur la revue de la nouvelle logique." },
+        { level: 2, date: "T2 2025", title: "Le Testeur de Logique Isolée", roleIA: "Génère des tests ciblés sur une très petite partie du code (une seule fonction).", roleDev: "Valide les tests générés et s'assure que les cas de base pour cette petite unité sont couverts." },
+        { level: 3, date: "T4 2025", title: "Le Testeur Comportemental", roleIA: "Génère des tests d'intégration ou fonctionnels simples qui vérifient le comportement d'une feature.", roleDev: "Définit le comportement attendu et valide que les tests de l'IA le vérifient correctement." },
+        { level: 4, date: "T2 2026", title: "L'Architecte de la Qualité", roleIA: "Conçoit une stratégie de test complète pour une feature.", roleDev: "Valide le plan de test global de l'IA. La confiance se déplace de la revue du code à la revue de la stratégie de qualité." },
+        { level: 5, date: "2027", title: "L'Agent Qualité Autonome", roleIA: "Prend en charge le cycle complet : écrit le code, génère et exécute les tests, et se corrige jusqu'à validation.", roleDev: "Définit l'objectif et les critères de succès. Fait confiance au processus." }
+      ]
+    }
+  };
+
+  const myFinalAiDrivenPath  = {
+    specification: {
+      title: "Spécification",
+      subtitle: "(Comment formaliser le besoin pour l'IA ?)",
+      colorClass: "spec",
+      steps: [
+        { level: 0, date: "Avant 2024", title: "Spécification 100% Manuelle", roleIA: "Nul. L'IA n'intervient pas.", roleDev: "La spécification est entièrement pensée et rédigée par l'humain." },
+        { level: 1, date: "2024", title: "Le Traducteur Humain", roleIA: "Nul.", roleDev: "Reçoit un besoin métier oral ou simple, puis crée lui-même les tickets et les spécifications techniques détaillées." },
+        { level: 2, date: "2025", title: "L'Assistant à la Spécification", roleIA: "Outil de brainstorming pour challenger une approche technique ou suggérer des alternatives.", roleDev: "Reste le seul auteur des specs, mais s'appuie sur l'IA pour affiner sa réflexion et explorer les angles morts." },
+        { level: 3, date: "2025", title: "Le Formalisateur de Contexte", roleIA: "À partir d'un ticket détaillé, génère une première ébauche de plan d'implémentation (fichiers à créer, fonctions clés).", roleDev: "Fournit un 'contexte projet' (principes d'archi, exemples de code) et valide/corrige le plan de l'IA." },
+        { level: 4, date: "2026", title: "Le Rédacteur de User Stories Techniques", roleIA: "À partir d'un plan validé, rédige les user stories techniques complètes, y compris les critères d'acceptation.", roleDev: "Valide la cohérence des stories générées et les ajuste avant de les passer en production." },
+        { level: 5, date: "2027", title: "L'Architecte de Tests via Specs", roleIA: "Analyse une spécification (ticket Jira) et génère le squelette des fichiers de test (`*.test.js`) avec les blocs `describe` et `it`.", roleDev: "Valide que le plan de test généré correspond bien aux critères d'acceptation de la spec." }
+      ]
+    },
+    production: {
+      title: "Production",
+      subtitle: "(Qui écrit le code ?)",
+      colorClass: "prod",
+      steps: [
+        { level: 0, date: "Avant 2023", title: "L'Artisan (100% Manuel)", roleIA: "Nul. L'IA n'intervient pas.", roleDev: "Rédige 100% du code sans aucune assistance de l'IA." },
+        { level: 1, date: "2024", title: "L'Assistant de Frappe", roleIA: "Suggère des fins de ligne ou des fragments de code (complétion).", roleDev: "Code la logique principale et accepte les micro-suggestions pour accélérer la frappe." },
+        { level: 2, date: "2025", title: "Le Générateur de Fonctions", roleIA: "Écrit des fonctions ou méthodes complètes et autonomes à partir d'un commentaire.", roleDev: "Spécifie le comportement d'une unité de code et valide le résultat généré." },
+        { level: 3, date: "2025", title: "Le Bâtisseur Supervisé", roleIA: "Génère 80-90% du code pour un composant ou une classe.", roleDev: "Agit en architecte, puis finalise et corrige manuellement le code généré pour l'intégrer." },
+        { level: 4, date: "2026", title: "L'Implémenteur Fiable", roleIA: "Prend une spec technique complète et réalise l'ensemble de l'implémentation avec une haute fidélité.", roleDev: "Fournit une spécification parfaite et effectue une revue finale, n'intervenant que pour des ajustements mineurs." },
+        { level: 5, date: "2027", title: "L'Agent de Production Autonome", roleIA: "Gère la production de code de bout en bout à partir d'une spec.", roleDev: "Se concentre uniquement sur la validation du résultat fonctionnel." }
+      ]
+    },
+    validation: {
+      title: "Validation",
+      subtitle: "(Comment l'IA gagne notre confiance ?)",
+      colorClass: "valid",
+      steps: [
+        { level: 0, date: "Avant 2024", title: "Validation sans IA", roleIA: "Nul. L'IA n'intervient pas.", roleDev: "La validation et les tests sont entièrement effectués par l'humain." },
+        { level: 1, date: "2024", title: "L'Inspecteur Manuel", roleIA: "Nulle. La qualité repose entièrement sur l'humain.", roleDev: "Relit manuellement le code, exécute les tests et vérifie la fonctionnalité à la main." },
+        { level: 2, date: "2025", title: "Le Testeur de Logique Isolée", roleIA: "Génère des tests unitaires ciblés sur une très petite partie du code (une seule fonction).", roleDev: "Valide les tests générés et s'assure que les cas de base pour cette petite unité sont couverts." },
+        { level: 3, date: "2025", title: "Le Testeur Comportemental Supervisé", roleIA: "Génère des tests d'intégration ou fonctionnels simples qui vérifient le comportement d'une feature.", roleDev: "Définit le comportement attendu et supervise étroitement les tests générés par l'IA pour s'assurer qu'ils sont pertinents et robustes." },
+        { level: 4, date: "2026", title: "Le Testeur de Bout-en-Bout (E2E)", roleIA: "À partir d'un scénario utilisateur, génère le script de test complet pour un framework E2E (ex: Cypress, Playwright).", roleDev: "Définit les scénarios utilisateurs clés et valide le script de test généré." },
+        { level: 5, date: "2027", title: "L'Agent Qualité Autonome", roleIA: "Prend en charge le cycle complet : écrit le code, génère et exécute les tests pertinents (unitaires, intégration, E2E), et se corrige jusqu'à ce que tous les tests passent.", roleDev: "Définit l'objectif et les critères de succès. Ne valide que le résultat final, en faisant confiance au processus qualité de l'IA." }
+      ]
+    }
+  };
+
+  const data = myFinalAiDrivenPath;
+  // =================================================================================
+  // === LOGIQUE DE L'APPLICATION (NE PAS MODIFIER SAUF SI NÉCESSAIRE) ================
+  // =================================================================================
+
+  document.addEventListener('DOMContentLoaded', () => {
+
+    const pathsWrapper = document.getElementById('paths-wrapper');
+
+    function renderPaths() {
+      let allPathsHTML = '';
+      for (const axeKey in data) {
+        const axeData = data[axeKey];
+
+        const stepsHTML = axeData.steps.map(step => `
+                        <div class="step text-center flex-1 ${axeData.colorClass}-border">
+                            <p class="text-xs text-gray-500 mb-2 h-4">${step.date || ''}</p>
+                            <div class="step-point w-8 h-8 mx-auto rounded-full border-2 ${axeData.colorClass}-border bg-gray-900 flex items-center justify-center font-bold"
+                                 data-title="${step.title}"
+                                 data-role-ia="${step.roleIA}"
+                                 data-role-dev="${step.roleDev}">
+                                ${step.level}
+                            </div>
+                            <p class="mt-2 text-sm text-gray-300">${step.title}</p>
+                        </div>
+                    `).join('');
+
+        allPathsHTML += `
+                        <div class="path-container" data-axe="${axeKey}">
+                            <h2 class="text-2xl font-bold mb-8 flex items-center">
+                                <span class="w-3 h-3 rounded-full mr-3 ${axeData.colorClass}-bg"></span>
+                                Axe ${Object.keys(data).indexOf(axeKey) + 1} : ${axeData.title}
+                                <span class="text-base font-normal text-gray-400 ml-2">${axeData.subtitle}</span>
+                            </h2>
+                            <div class="relative flex justify-between">
+                                <div class="path-lines-container">
+                                    <div class="path-background"></div>
+                                    <div class="path-progress ${axeData.colorClass}-bg"></div>
+                                </div>
+                                ${stepsHTML}
+                            </div>
+                        </div>
+                    `;
+      }
+      pathsWrapper.innerHTML = allPathsHTML;
+    }
+
+    function updateVisualProgress() {
+      const pathContainers = document.querySelectorAll('.path-container');
+      pathContainers.forEach(container => {
+        const axe = container.getAttribute('data-axe');
+        const currentLevel = progressConfig[axe];
+        const steps = container.querySelectorAll('.step');
+        const progressLine = container.querySelector('.path-progress');
+        const linesContainer = container.querySelector('.path-lines-container');
+
+        const totalSteps = steps.length;
+        if (totalSteps <= 1) return;
+
+        const stepContainerWidthPercent = 100 / totalSteps;
+        linesContainer.style.left = `${stepContainerWidthPercent / 2}%`;
+        linesContainer.style.right = `${stepContainerWidthPercent / 2}%`;
+
+        steps.forEach((step, index) => {
+          step.classList.remove('step-active');
+          if (index <= currentLevel) {
+            step.classList.add('step-active');
+          }
+        });
+
+        const progressPercentage = (currentLevel / (totalSteps - 1)) * 100;
+        progressLine.style.width = `${progressPercentage}%`;
+      });
+    }
+
+    function initializeTooltips() {
+      const tooltip = document.getElementById('tooltip');
+      const stepPoints = document.querySelectorAll('.step-point');
+
+      const showTooltip = (event) => {
+        const point = event.currentTarget;
+        const title = point.getAttribute('data-title');
+        const roleIA = point.getAttribute('data-role-ia');
+        const roleDev = point.getAttribute('data-role-dev');
+
+        tooltip.innerHTML = `
+                        <h4 class="font-bold text-white mb-2">${title}</h4>
+                        <div class="text-xs">
+                            <p class="mb-1"><strong class="text-blue-400">Rôle IA:</strong> ${roleIA}</p>
+                            <p><strong class="text-green-400">Rôle Dev:</strong> ${roleDev}</p>
+                        </div>
+                    `;
+
+        const x = event.pageX + 15;
+        const y = event.pageY + 15;
+        tooltip.style.left = `${x}px`;
+        tooltip.style.top = `${y}px`;
+        tooltip.style.display = 'block';
+      };
+
+      const hideTooltip = () => {
+        tooltip.style.display = 'none';
+      };
+
+      stepPoints.forEach(point => {
+        point.addEventListener('mouseover', showTooltip);
+        point.addEventListener('mouseout', hideTooltip);
+        point.addEventListener('mousemove', (e) => {
+          const x = e.pageX + 15;
+          const y = e.pageY + 15;
+          tooltip.style.left = `${x}px`;
+          tooltip.style.top = `${y}px`;
+        });
+      });
+    }
+
+    // --- Exécution de l'initialisation ---
+    renderPaths();
+    updateVisualProgress();
+    initializeTooltips();
+  });
+</script>
+</body>
+</html>
